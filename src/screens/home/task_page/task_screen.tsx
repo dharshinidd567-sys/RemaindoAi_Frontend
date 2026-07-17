@@ -13,7 +13,7 @@ import { fetchTasks, toggleTask as toggleTaskApi } from '../../../services/task_
 
 import ProgressCard from '../../../common/progresscard/progresscard';
 import FilterTabs from '../../../common/filter_tabs/filtertabs';
-import ListRow from '../../../common/list_item/list_item';
+import ListItem from '../../../common/list_item/list_item';
 import TaskPopup from './task_form_modal/task_popup';
 
 import { styles } from './task_screen_styles';
@@ -138,7 +138,7 @@ export default function TaskScreen() {
             const timeLabel = (item as any).time ?? (item as any).dueTime ?? null;
 
             return (
-              <ListRow
+              <ListItem
                 id={item.taskId}
                 title={item.title}
                 subtitle={`${item.category} · ${item.priority}`}

@@ -42,7 +42,7 @@ export type ListRowProps = {
   onDelete?: (id: string) => void;
 };
 
-export default function ListRow({
+export default function ListItem({
   id,
   title,
   subtitle,
