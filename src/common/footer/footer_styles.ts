@@ -1,0 +1,105 @@
+import { StyleSheet } from 'react-native';
+
+export const COLORS = {
+  bar: '#14121f',
+  barBorder: '#232037',
+  inactive: '#8b899e',
+  active: '#b9a6ff',
+  accent1: '#ff5fa2',
+  accent2: '#7c5cff',
+};
+
+export const styles = StyleSheet.create({
+  navbarContainer: {
+    position: 'relative',
+    width: '100%',
+    marginBottom:-3,
+  },
+  navbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    backgroundColor: COLORS.bar,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderWidth: 1,
+    borderColor: COLORS.barBorder,
+    borderBottomWidth: 0,
+    paddingTop: 14,
+    paddingBottom: 18,
+    paddingHorizontal: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -8 },
+    shadowOpacity: 0.45,
+    shadowRadius: 20,
+    elevation: 12,
+  },
+  navItem: {
+    alignItems: 'center',
+    width: 64,
+    paddingVertical: 6,
+    paddingBottom:45
+  },
+  iconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconCircleGlow: {
+    shadowColor: COLORS.accent2,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  label: {
+    fontSize: 11,
+    marginTop: 2,
+    letterSpacing: 0.2,
+  },
+  fabWrap: {
+    width: 64,
+    alignItems: 'center',
+  },
+  fabShadow: {
+    position: 'absolute',
+    top: -34,
+    shadowColor: COLORS.accent1,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 14,
+  },
+  fab: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  taskIconWrapper: {
+    position: 'absolute',
+    top: -60,
+    left: '50%',
+    marginLeft: -32,
+    zIndex: 100,
+  },
+  taskIconButton: {
+    width: 64,
+    alignItems: 'center',
+  },
+  taskIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: COLORS.accent2,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+});
