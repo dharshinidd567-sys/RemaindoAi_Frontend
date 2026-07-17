@@ -13,7 +13,7 @@ import { fetchTasks, toggleTask as toggleTaskApi } from '../../../services/task_
 
 import ProgressCard from '../../../common/progresscard/progresscard';
 import FilterTabs from '../../../common/filter_tabs/filtertabs';
-import TaskItem from '../../../common/task_item/task_item';
+import ListRow from '../../../common/list_item/list_item';
 import TaskPopup from './task_form_modal/task_popup';
 
 import { styles } from './task_screen_styles';
@@ -29,13 +29,7 @@ export default function TaskScreen() {
   });
   const [modalVisible, setModalVisible] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const CATEGORIES = [
-    'All',
-    'Work',
-    'Personal',
-    'Family',
-    'Health',
-  ];
+  const CATEGORIES = ['All', 'Work', 'Personal', 'Family', 'Health'];
   const [activeCategory, setActiveCategory] = useState<Category>('All');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -45,15 +39,37 @@ export default function TaskScreen() {
     try {
       setError(null);
       const data = await fetchTasks(category);
-      setTasks(data.tasks);
-      setSummary(data.summary);
+      const taskList = data.tasks ?? [];
+      setTasks(taskList);
     } catch (err) {
-      setError('Could not load tasks. Check your connection and try again.');
+      console.error(err);
+      setError('Could not load tasks.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   }, []);
+
+  // Client-side safety net: filters what's shown by the active tab even if
+  // the API doesn't already filter by category server-side.
+  const visibleTasks =
+    activeCategory === 'All'
+      ? tasks
+      : tasks.filter((t) => t.category === activeCategory);
+
+  useEffect(() => {
+    const done = visibleTasks.filter((t) => t.isDone).length;
+    const pending = visibleTasks.length - done;
+    const overdue = visibleTasks.filter((t) => t.isOverdue).length;
+
+    setSummary({
+      total: visibleTasks.length,
+      done,
+      pending,
+      overdue,
+      percent: visibleTasks.length === 0 ? 0 : Math.round((done / visibleTasks.length) * 100),
+    });
+  }, [tasks, activeCategory]);
 
   useEffect(() => {
     setLoading(true);
@@ -66,16 +82,15 @@ export default function TaskScreen() {
   };
 
   const handleToggle = async (taskId: string) => {
-    // optimistic update so the checkbox feels instant
     setTasks((prev) =>
       prev.map((t) => (t.taskId === taskId ? { ...t, isDone: !t.isDone } : t))
     );
     try {
       await toggleTaskApi(taskId);
-      loadTasks(activeCategory); // resync summary counts (done/pending/overdue)
+      loadTasks(activeCategory);
     } catch (err) {
       setError('Could not update task.');
-      loadTasks(activeCategory); // revert on failure
+      loadTasks(activeCategory);
     }
   };
 
@@ -83,8 +98,8 @@ export default function TaskScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Tasks</Text>
-        <TouchableOpacity 
-          style={styles.addButton} 
+        <TouchableOpacity
+          style={styles.addButton}
           activeOpacity={0.8}
           onPress={() => {
             setEditingTask(null);
@@ -111,18 +126,41 @@ export default function TaskScreen() {
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       {loading ? (
-        <ActivityIndicator style={styles.loader} color="#7c5cff" size="large" />
+        <ActivityIndicator style={styles.loader} color="#a259ff" size="large" />
       ) : (
         <FlatList
-          data={tasks}
+          data={visibleTasks}
           keyExtractor={(item) => item.taskId}
-          renderItem={({ item }) => <TaskItem task={item} onToggle={handleToggle} />}
+          renderItem={({ item }) => {
+            const isOverdue = !item.isDone && item.isOverdue;
+            // Task time — adjust this field name to whatever your Task type
+            // actually calls it (e.g. dueTime, scheduledAt, time).
+            const timeLabel = (item as any).time ?? (item as any).dueTime ?? null;
+
+            return (
+              <ListRow
+                id={item.taskId}
+                title={item.title}
+                subtitle={`${item.category} · ${item.priority}`}
+                done={item.isDone}
+                onToggle={handleToggle}
+                rightNode={
+                  isOverdue ? (
+                    <Text style={{ color: '#e8534c', fontSize: 12, fontWeight: '700' }}>
+                      ⚠ Late
+                    </Text>
+                  ) : undefined
+                }
+                rightText={!isOverdue ? timeLabel : undefined}
+              />
+            );
+          }}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor="#7c5cff"
+              tintColor="#a259ff"
             />
           }
           ListEmptyComponent={
