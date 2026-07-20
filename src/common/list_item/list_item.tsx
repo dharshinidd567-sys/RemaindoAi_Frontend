@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { SharedValue } from 'react-native-reanimated';
 import { listRowStyles as s, COLORS } from './list_items_styles';
-
+import { Pencil, Trash2 } from "lucide-react-native";
 type LeftAccessory = 'checkbox' | 'dot' | 'icon' | 'none';
 
 export type ListRowProps = {
@@ -167,29 +167,46 @@ export default function ListItem({
     return renderCard();
   }
 
-  // Static action — no scale/opacity animation tied to swipe progress,
-  // which keeps this compatible across gesture-handler/reanimated versions.
+  // Two actions revealed on left swipe: Edit then Delete, each its own
+  // rounded pill with breathing room between them and the card.
   const renderRightActions = (
     _progress: SharedValue<number>,
     _translation: SharedValue<number>
   ) => (
-    <TouchableOpacity
-      style={s.deleteAction}
-      activeOpacity={0.8}
-      onPress={() => {
-        swipeableRef.current?.close();
-        onDelete(id);
-      }}
-    >
-      <Text style={s.deleteActionText}>Delete</Text>
-    </TouchableOpacity>
+    <View style={s.swipeActionsRow}>
+      <TouchableOpacity
+        style={s.editAction}
+        activeOpacity={0.85}
+        onPress={() => {
+          swipeableRef.current?.close();
+          onPress?.();
+        }}
+      >
+        <Pencil size={20} color="#fff" />
+        <Text style={s.actionText}>Edit</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={s.deleteAction}
+        activeOpacity={0.85}
+        onPress={() => {
+          swipeableRef.current?.close();
+          onDelete(id);
+        }}
+      >
+        <Trash2 size={20} color="#fff" />
+        <Text style={s.actionText}>Delete</Text>
+      </TouchableOpacity>
+    </View>
   );
+
   return (
     <Swipeable
       ref={swipeableRef}
       renderRightActions={renderRightActions}
       overshootRight={false}
-      rightThreshold={40}
+      rightThreshold={24}
+      friction={1.5}
     >
       {renderCard()}
     </Swipeable>

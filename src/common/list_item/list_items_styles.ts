@@ -136,20 +136,44 @@ export const listRowStyles = StyleSheet.create({
     marginLeft: 6,
   },
 
-  /* ---------------- SWIPE DELETE ---------------- */
+  /* ---------------- SWIPE ACTIONS ---------------- */
+
+  swipeActionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingLeft: 8,
+    marginBottom: 14, // matches card's marginBottom so it lines up while swiping
+  },
+
+  editAction: {
+    width: 68,
+    height: "100%",
+    backgroundColor: COLORS.defaultAccent,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 2,
+  },
 
   deleteAction: {
-    width: 84,
-    marginBottom: 14, // matches card's marginBottom so it lines up while swiping
+    width: 68,
+    height: "100%",
     backgroundColor: COLORS.deleteBg,
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
+    gap: 2,
   },
 
-  deleteActionText: {
+  actionIcon: {
+    fontSize: 16,
     color: "#FFFFFF",
-    fontSize: 14,
+  },
+
+  actionText: {
+    color: "#FFFFFF",
+    fontSize: 12,
     fontWeight: "700",
   },
 });

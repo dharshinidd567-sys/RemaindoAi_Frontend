@@ -5,10 +5,7 @@ import { Platform } from "react-native";
 // e.g. 'http://192.168.1.42:5000/api/v1'
 // const BASE_URL =process.env.EXPO_PUBLIC_API_URL;
 
-const BASE_URL =
-  Platform.OS === "web"
-    ? process.env.EXPO_PUBLIC_API_URL_WEB
-    : process.env.EXPO_PUBLIC_API_URL_DEVICE!;
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL_DEVICE!;
 console.log("Platform:", Platform.OS);
 console.log("BASE_URL:", BASE_URL);
 export async function fetchTasks(category: Category): Promise<TasksResponse> {

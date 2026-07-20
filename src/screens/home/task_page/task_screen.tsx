@@ -6,10 +6,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 
 import { Category, Summary, Task } from '../../../screens/home/task_page/task_screen_types';
-import { fetchTasks, toggleTask as toggleTaskApi } from '../../../services/api';
+import { fetchTasks, toggleTask as toggleTaskApi, deleteTask as deleteTaskApi } from '../../../services/api';
 
 import ProgressCard from '../../../common/progresscard/progresscard';
 import FilterTabs from '../../../common/filter_tabs/filtertabs';
@@ -38,12 +39,19 @@ export default function TaskScreen() {
   const loadTasks = useCallback(async (category: Category) => {
     try {
       setError(null);
+
       const data = await fetchTasks(category);
+
+      console.log("API DATA:", data);
+
       const taskList = data.tasks ?? [];
+
+      console.log("TASK LIST:", taskList);
+
       setTasks(taskList);
     } catch (err) {
-      console.error(err);
-      setError('Could not load tasks.');
+      console.error("LOAD ERROR:", err);
+      setError("Could not load tasks.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -93,10 +101,28 @@ export default function TaskScreen() {
       loadTasks(activeCategory);
     }
   };
+
   const handleEdit = (task: Task) => {
     setEditingTask(task);
     setModalVisible(true);
   };
+
+  // Wired to ListItem's onDelete. Optimistically removes the row, then
+  // rolls back + reloads if the API call fails.
+  const handleDelete = async (taskId: string) => {
+    const previousTasks = tasks;
+    setTasks((prev) => prev.filter((t) => t.taskId !== taskId));
+
+    try {
+      await deleteTaskApi(taskId);
+    } catch (err) {
+      console.error("DELETE ERROR:", err);
+      setError('Could not delete task.');
+      setTasks(previousTasks); // rollback
+      Alert.alert('Error', 'Failed to delete task. Please try again.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -148,6 +174,7 @@ export default function TaskScreen() {
                 done={item.isDone}
                 onToggle={handleToggle}
                 onPress={() => handleEdit(item)}
+                onDelete={handleDelete}
                 rightNode={
                   isOverdue ? (
                     <Text
