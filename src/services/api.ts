@@ -1,11 +1,16 @@
-import { Category, Task, TasksResponse } from '../../screens/home/task_page/task_screen_types';
-
+import { Category, Task, TasksResponse } from '../screens/home/task_page/task_screen_types';
+import { Platform } from "react-native";
 // Point this at your machine's LAN IP when testing on a physical device —
 // 'localhost' won't resolve to your dev machine from a real phone.
 // e.g. 'http://192.168.1.42:5000/api/v1'
+// const BASE_URL =process.env.EXPO_PUBLIC_API_URL;
+
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL;
-console.log("API URL:", process.env.EXPO_PUBLIC_API_URL);
+  Platform.OS === "web"
+    ? process.env.EXPO_PUBLIC_API_URL_WEB
+    : process.env.EXPO_PUBLIC_API_URL_DEVICE!;
+console.log("Platform:", Platform.OS);
+console.log("BASE_URL:", BASE_URL);
 export async function fetchTasks(category: Category): Promise<TasksResponse> {
   const query = category !== "All" ? `?category=${category}` : "";
 

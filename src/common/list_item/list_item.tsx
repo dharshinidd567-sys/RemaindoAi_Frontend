@@ -1,5 +1,7 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { SharedValue } from 'react-native-reanimated';
 import { listRowStyles as s, COLORS } from './list_items_styles';
 
 type LeftAccessory = 'checkbox' | 'dot' | 'icon' | 'none';
@@ -38,8 +40,14 @@ export type ListRowProps = {
   rightTextStrikethrough?: boolean; // e.g. struck-through price once bought/done
   rightNode?: ReactNode;
 
-  onEdit?: (id: string) => void;
+  // onPress on the text column = "edit". Tapping the title/subtitle opens edit.
+  onPress?: () => void;
+
+  // Swipe left to reveal a delete action. Fully wired to the Swipeable below.
   onDelete?: (id: string) => void;
+
+  // Set false if you want this row to be non-deletable (e.g. a locked item).
+  swipeToDelete?: boolean;
 };
 
 export default function ListItem({
@@ -55,117 +63,135 @@ export default function ListItem({
   rightText,
   rightTextStrikethrough = false,
   rightNode,
-  onEdit,
+  onPress,
   onDelete,
+  swipeToDelete = true,
 }: ListRowProps) {
+  const swipeableRef = useRef<SwipeableMethods>(null);
   const titleStyle = [s.title, done && strikeWhenDone && s.titleDone];
 
-const renderLeft = () => {
-  if (leftAccessory === "none") return null;
+  const renderLeft = () => {
+    if (leftAccessory === "none") return null;
 
-  if (leftAccessory === "dot") {
-    return (
-      <View style={s.leftSlot}>
-        <View
-          style={[
-            s.dot,
-            {
-              backgroundColor: accentColor,
-            },
-          ]}
-        />
-      </View>
-    );
-  }
-
-  if (leftAccessory === "icon") {
-    return (
-      <View style={s.leftSlot}>
-        <Text style={s.icon}>{icon}</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={s.leftSlot}>
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={() => onToggle?.(id)}
-        style={[
-          s.checkbox,
-          done && {
-            backgroundColor: `${accentColor}26`,
-            borderColor: accentColor,
-          },
-        ]}
-      >
-        {done && (
-          <Text
+    if (leftAccessory === "dot") {
+      return (
+        <View style={s.leftSlot}>
+          <View
             style={[
-              s.checkmark,
+              s.dot,
               {
-                color: accentColor,
+                backgroundColor: accentColor,
               },
             ]}
-          >
-            ✓
+          />
+        </View>
+      );
+    }
+
+    if (leftAccessory === "icon") {
+      return (
+        <View style={s.leftSlot}>
+          <Text style={s.icon}>{icon}</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={s.leftSlot}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => onToggle?.(id)}
+          style={[
+            s.checkbox,
+            done && {
+              backgroundColor: `${accentColor}26`,
+              borderColor: accentColor,
+            },
+          ]}
+        >
+          {done && (
+            <Text
+              style={[
+                s.checkmark,
+                {
+                  color: accentColor,
+                },
+              ]}
+            >
+              ✓
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderCard = () => (
+    <View style={[s.card, done && s.cardDone]}>
+      {renderLeft()}
+
+      <TouchableOpacity
+        style={s.textCol}
+        activeOpacity={0.7}
+        onPress={onPress}
+      >
+        <Text style={titleStyle} numberOfLines={1}>
+          {title}
+        </Text>
+
+        {!!subtitle && (
+          <Text style={s.subtitle} numberOfLines={1}>
+            {subtitle}
           </Text>
         )}
       </TouchableOpacity>
-    </View>
-  );
-};
-return (
-  <View style={[s.card, done && s.cardDone]}>
-    {renderLeft()}
 
-    <View style={s.textCol}>
-      <Text style={titleStyle} numberOfLines={1}>
-        {title}
-      </Text>
-
-      {!!subtitle && (
-        <Text style={s.subtitle} numberOfLines={1}>
-          {subtitle}
-        </Text>
-      )}
-    </View>
-
-    <View style={s.rightSlot}>
-      {rightNode ? (
-        rightNode
-      ) : (
-        <Text
-          style={[
-            s.rightText,
-            rightTextStrikethrough && s.rightTextStrikethrough,
-          ]}
-        >
-          {rightText}
-        </Text>
-      )}
-    </View>
-
-    {(onEdit || onDelete) && (
-      <View style={s.actionsCol}>
-        {onEdit && (
-          <TouchableOpacity
-            style={s.iconButton}
-            onPress={() => onEdit(id)}
+      <View style={s.rightSlot}>
+        {rightNode ? (
+          rightNode
+        ) : (
+          <Text
+            style={[
+              s.rightText,
+              rightTextStrikethrough && s.rightTextStrikethrough,
+            ]}
           >
-            <Text>✏️</Text>
-          </TouchableOpacity>
-        )}
-
-        {onDelete && (
-          <TouchableOpacity
-            style={s.iconButton}
-            onPress={() => onDelete(id)}
-          >
-            <Text>🗑️</Text>
-          </TouchableOpacity>
+            {rightText}
+          </Text>
         )}
       </View>
-    )}
-  </View>
-)}
+    </View>
+  );
+
+  if (!swipeToDelete || !onDelete) {
+    return renderCard();
+  }
+
+  // Static action — no scale/opacity animation tied to swipe progress,
+  // which keeps this compatible across gesture-handler/reanimated versions.
+  const renderRightActions = (
+    _progress: SharedValue<number>,
+    _translation: SharedValue<number>
+  ) => (
+    <TouchableOpacity
+      style={s.deleteAction}
+      activeOpacity={0.8}
+      onPress={() => {
+        swipeableRef.current?.close();
+        onDelete(id);
+      }}
+    >
+      <Text style={s.deleteActionText}>Delete</Text>
+    </TouchableOpacity>
+  );
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      overshootRight={false}
+      rightThreshold={40}
+    >
+      {renderCard()}
+    </Swipeable>
+  );
+}

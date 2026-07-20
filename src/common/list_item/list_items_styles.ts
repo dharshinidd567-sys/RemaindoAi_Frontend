@@ -14,6 +14,8 @@ export const COLORS = {
   subtitleText: "#9B97B8",
 
   rightText: "#FFFFFF",
+
+  deleteBg: "#E24B4A",
 };
 
 export const listRowStyles = StyleSheet.create({
@@ -132,5 +134,22 @@ export const listRowStyles = StyleSheet.create({
     justifyContent: "center",
 
     marginLeft: 6,
+  },
+
+  /* ---------------- SWIPE DELETE ---------------- */
+
+  deleteAction: {
+    width: 84,
+    marginBottom: 14, // matches card's marginBottom so it lines up while swiping
+    backgroundColor: COLORS.deleteBg,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  deleteActionText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
   },
 });

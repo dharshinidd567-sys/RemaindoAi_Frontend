@@ -53,3 +53,12 @@ const styles = StyleSheet.create({
     color: '#b9a6ff',
   },
 });
+// import { View, Text } from "react-native";
+
+// export default function App() {
+//   return (
+//     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+//       <Text>Hello Remaindo AI</Text>
+//     </View>
+//   );
+// }

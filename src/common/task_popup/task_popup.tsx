@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { styles } from './task_popup_styles';
-import { createTask, updateTask } from '../../services/task_page/task_api';
+import { createTask, updateTask } from '../../services/api';
 import { Task } from '../../screens/home/task_page/task_screen_types';
 import Popup from '../popup/popup';
 
@@ -25,7 +25,8 @@ interface TaskPopupProps {
   onTaskAdded?: () => void;
   editingTask?: Task | null;
 }
-
+type CategoryType = "Work" | "Personal" | "Family" | "Health";
+type PriorityType = "Low" | "Medium" | "High";
 export const TaskPopup: React.FC<TaskPopupProps> = ({
   visible,
   onClose,
@@ -34,8 +35,12 @@ export const TaskPopup: React.FC<TaskPopupProps> = ({
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Work');
-  const [selectedPriority, setSelectedPriority] = useState('Medium');
+
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryType>("Work");
+
+  const [selectedPriority, setSelectedPriority] =
+    useState<PriorityType>("Medium");
   const [dueDate, setDueDate] = useState('');
   const [selectedReminder, setSelectedReminder] = useState('None');
   const [selectedRepeat, setSelectedRepeat] = useState('None');
@@ -159,7 +164,7 @@ export const TaskPopup: React.FC<TaskPopupProps> = ({
         {/* Category */}
         <View style={styles.section}>
           <Text style={styles.label}>Category</Text>
-          {CATEGORIES.map((cat) => (
+          {CATEGORIES.map((cat:any) => (
             <TouchableOpacity
               key={cat}
               style={styles.checkboxOption}
@@ -184,7 +189,7 @@ export const TaskPopup: React.FC<TaskPopupProps> = ({
         {/* Priority */}
         <View style={styles.section}>
           <Text style={styles.label}>Priority</Text>
-          {PRIORITIES.map((pri) => (
+          {PRIORITIES.map((pri:any) => (
             <TouchableOpacity
               key={pri}
               style={styles.checkboxOption}

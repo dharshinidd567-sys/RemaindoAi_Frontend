@@ -9,12 +9,12 @@ import {
 } from 'react-native';
 
 import { Category, Summary, Task } from '../../../screens/home/task_page/task_screen_types';
-import { fetchTasks, toggleTask as toggleTaskApi } from '../../../services/task_page/task_api';
+import { fetchTasks, toggleTask as toggleTaskApi } from '../../../services/api';
 
 import ProgressCard from '../../../common/progresscard/progresscard';
 import FilterTabs from '../../../common/filter_tabs/filtertabs';
 import ListItem from '../../../common/list_item/list_item';
-import TaskPopup from './task_form_modal/task_popup';
+import TaskPopup from './task_popup/task_popup';
 
 import { styles } from './task_screen_styles';
 
@@ -93,7 +93,10 @@ export default function TaskScreen() {
       loadTasks(activeCategory);
     }
   };
-
+  const handleEdit = (task: Task) => {
+    setEditingTask(task);
+    setModalVisible(true);
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -144,9 +147,16 @@ export default function TaskScreen() {
                 subtitle={`${item.category} · ${item.priority}`}
                 done={item.isDone}
                 onToggle={handleToggle}
+                onPress={() => handleEdit(item)}
                 rightNode={
                   isOverdue ? (
-                    <Text style={{ color: '#e8534c', fontSize: 12, fontWeight: '700' }}>
+                    <Text
+                      style={{
+                        color: "#e8534c",
+                        fontSize: 12,
+                        fontWeight: "700",
+                      }}
+                    >
                       ⚠ Late
                     </Text>
                   ) : undefined
@@ -171,7 +181,10 @@ export default function TaskScreen() {
 
       <TaskPopup
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={() => {
+          setModalVisible(false);
+          setEditingTask(null);
+        }}
         onTaskSaved={() => loadTasks(activeCategory)}
         editingTask={editingTask}
       />
