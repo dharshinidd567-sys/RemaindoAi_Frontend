@@ -19,6 +19,8 @@ export interface Task {
   color?: any;
   emoji?: string;
   notes?: string;
+  reminderTime?: string;
+  repeatType?: 'daily' | 'weekly' | 'monthly' | 'custom';
 }
 
 export interface Summary {

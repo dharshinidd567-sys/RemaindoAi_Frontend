@@ -1,69 +1,134 @@
 import React, { ReactNode, useRef } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { SharedValue } from 'react-native-reanimated';
-import { listRowStyles as s, COLORS } from './list_items_styles';
-import { Pencil, Trash2 } from "lucide-react-native";
+import Animated, {
+  SharedValue,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
+import { listRowStyles as s } from './list_items_styles';
+import { Pencil, Trash2 } from 'lucide-react-native';
+
 type LeftAccessory = 'checkbox' | 'dot' | 'icon' | 'none';
+
+export type Priority = 'high' | 'medium' | 'low';
+export type RepeatType = 'daily' | 'weekly' | 'monthly' | 'custom';
+
+// Single source of truth for priority -> color. The left strip and
+// checkbox both read from this, so priority always drives the accent
+// regardless of any per-task color field.
+export const PRIORITY_COLORS: Record<Priority, string> = {
+  high: '#713852',   // red
+  medium: '#4a295a', // orange
+  low: '#503d57',    // grey
+};
+
+// Short label shown next to the bell so the repeat frequency is visible
+// at a glance without opening the task.
+export const REPEAT_LABELS: Record<RepeatType, string> = {
+  daily: 'Daily',
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  custom: 'Custom',
+};
+
+// API values sometimes come back as "High", "HIGH", or with stray
+// whitespace. Normalize before lookup so a casing mismatch never
+// silently falls through to an unstyled default.
+function resolveAccentColor(priority?: string): string {
+  const key = (priority ?? '').trim().toLowerCase() as Priority;
+  return PRIORITY_COLORS[key] ?? PRIORITY_COLORS.low;
+}
+
+// Strips a bare 4-digit year out of a date string, e.g.
+// "21 Jul 2026" -> "21 Jul". Leaves anything else untouched.
+export function formatDateNoYear(dateStr?: string | null): string | null {
+  if (!dateStr) return null;
+  return dateStr.replace(/\s*\b\d{4}\b/, '').trim();
+}
 
 export type ListRowProps = {
   id: string;
   title: string;
-  subtitle?: string;
+  subtitle?: string; // category only, e.g. "Family" — no priority text
 
-  // Whether this row is "done" — drives strikethrough + default checkbox state.
+  priority?: string;       // 'high' | 'medium' | 'low' (case-insensitive)
+  hasReminder?: boolean;   // shows a bell when true
+  repeatType?: any;
+
   done?: boolean;
-
-  // What to show on the left. Defaults to 'checkbox'.
-  //  - 'checkbox' -> tappable circle, filled + checkmark when done
-  //  - 'dot'      -> plain colored dot, no tap target (good for reminders/events)
-  //  - 'icon'     -> emoji/icon instead of a checkbox (e.g. grocery items)
-  //  - 'none'     -> nothing on the left, text starts at the edge
   leftAccessory?: LeftAccessory;
-
-  // Icon/emoji to render when leftAccessory === 'icon' (e.g. "🥛").
   icon?: string;
-
-  // Task-level emoji/tag (e.g. item.tag). Independent of leftAccessory —
-  // shows as its own small badge next to the checkbox, doesn't replace it.
   emoji?: string;
-
-  // Color for the checkbox fill/ring or the dot. Defaults to teal.
-  // This is the "customise if you want, otherwise default" color knob.
-  // Also used for the card's left border strip when provided.
-  accentColor?: string;
-
-  // Whether the title gets struck through when done. Default true.
   strikeWhenDone?: boolean;
 
   onToggle?: (id: string) => void;
 
-  // Right side content. rightNode takes priority over rightText if both given.
-  // rightText covers the common cases (time, price) as a simple string.
-  // rightNode lets you pass something custom (e.g. avatar initials, a link).
   rightText?: string;
-  rightTextStrikethrough?: boolean; // e.g. struck-through price once bought/done
+  rightTextStrikethrough?: boolean;
   rightNode?: ReactNode;
 
-  // onPress on the text column = "edit". Tapping the title/subtitle opens edit.
   onPress?: () => void;
-
-  // Swipe left to reveal a delete action. Fully wired to the Swipeable below.
   onDelete?: (id: string) => void;
-
-  // Set false if you want this row to be non-deletable (e.g. a locked item).
   swipeToDelete?: boolean;
 };
+
+// Circular swipe action button that scales/fades in as swipe progress
+// increases, driven by the shared value Reanimated passes in.
+function SwipeAction({
+  progress,
+  color,
+  icon,
+  label,
+  onPress,
+}: {
+  progress: SharedValue<number>;
+  color: string;
+  icon: ReactNode;
+  label: string;
+  onPress: () => void;
+}) {
+  const animatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(progress.value, [0, 1], [0.6, 1], Extrapolation.CLAMP);
+    const opacity = interpolate(progress.value, [0, 0.5, 1], [0, 0.6, 1], Extrapolation.CLAMP);
+    return { transform: [{ scale }], opacity };
+  });
+
+  return (
+    <Animated.View style={[{ alignItems: 'center', marginHorizontal: 6 }, animatedStyle]}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={onPress}
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          backgroundColor: color,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {icon}
+      </TouchableOpacity>
+      <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+        {label}
+      </Text>
+    </Animated.View>
+  );
+}
 
 export default function ListItem({
   id,
   title,
   subtitle,
+  priority,
+  hasReminder = false,
+  repeatType,
   done = false,
   leftAccessory = 'checkbox',
   icon,
   emoji,
-  accentColor = COLORS.defaultAccent,
   strikeWhenDone = true,
   onToggle,
   rightText,
@@ -75,26 +140,20 @@ export default function ListItem({
 }: ListRowProps) {
   const swipeableRef = useRef<SwipeableMethods>(null);
   const titleStyle = [s.title, done && strikeWhenDone && s.titleDone];
+  const accentColor = resolveAccentColor(priority);
 
   const renderLeft = () => {
-    if (leftAccessory === "none") return null;
+    if (leftAccessory === 'none') return null;
 
-    if (leftAccessory === "dot") {
+    if (leftAccessory === 'dot') {
       return (
         <View style={s.leftSlot}>
-          <View
-            style={[
-              s.dot,
-              {
-                backgroundColor: accentColor,
-              },
-            ]}
-          />
+          <View style={[s.dot, { backgroundColor: accentColor }]} />
         </View>
       );
     }
 
-    if (leftAccessory === "icon") {
+    if (leftAccessory === 'icon') {
       return (
         <View style={s.leftSlot}>
           <Text style={s.icon}>{icon}</Text>
@@ -115,29 +174,16 @@ export default function ListItem({
             },
           ]}
         >
-          {done && (
-            <Text
-              style={[
-                s.checkmark,
-                {
-                  color: accentColor,
-                },
-              ]}
-            >
-              ✓
-            </Text>
-          )}
+          {done && <Text style={[s.checkmark, { color: accentColor }]}>✓</Text>}
         </TouchableOpacity>
       </View>
     );
   };
 
-  // Small rounded badge for the task's emoji/tag. Sits between the
-  // checkbox/dot/icon slot and the text column. Doesn't render at all
-  // if no emoji was passed, so rows without a tag look unchanged.
+  // Small rounded badge for the task's emoji/tag. Doesn't render if no
+  // emoji was passed, so rows without a tag look unchanged.
   const renderEmojiBadge = () => {
     if (!emoji) return null;
-
     return (
       <View
         style={{
@@ -160,26 +206,16 @@ export default function ListItem({
       style={[
         s.card,
         done && s.cardDone,
-        // Left border colour strip driven by accentColor (e.g. item.color).
-        // borderRadius reset to 0 so a single-side border doesn't look clipped.
-        !!accentColor && {
-          borderLeftWidth: 4,
-          borderLeftColor: accentColor,
-        },
+        { borderLeftWidth: 4, borderLeftColor: accentColor },
       ]}
     >
       {renderLeft()}
       {renderEmojiBadge()}
 
-      <TouchableOpacity
-        style={s.textCol}
-        activeOpacity={0.7}
-        onPress={onPress}
-      >
+      <TouchableOpacity style={s.textCol} activeOpacity={0.7} onPress={onPress}>
         <Text style={titleStyle} numberOfLines={1}>
           {title}
         </Text>
-
         {!!subtitle && (
           <Text style={s.subtitle} numberOfLines={1}>
             {subtitle}
@@ -192,10 +228,7 @@ export default function ListItem({
           rightNode
         ) : (
           <Text
-            style={[
-              s.rightText,
-              rightTextStrikethrough && s.rightTextStrikethrough,
-            ]}
+            style={[s.rightText, rightTextStrikethrough && s.rightTextStrikethrough]}
           >
             {rightText}
           </Text>
@@ -208,36 +241,28 @@ export default function ListItem({
     return renderCard();
   }
 
-  // Two actions revealed on left swipe: Edit then Delete, each its own
-  // rounded pill with breathing room between them and the card.
-  const renderRightActions = (
-    _progress: SharedValue<number>,
-    _translation: SharedValue<number>
-  ) => (
-    <View style={s.swipeActionsRow}>
-      <TouchableOpacity
-        style={s.editAction}
-        activeOpacity={0.85}
+  const renderRightActions = (progress: SharedValue<number>) => (
+    <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8 }}>
+      <SwipeAction
+        progress={progress}
+        color="rgba(255,255,255,0.08)"
+        icon={<Pencil size={18} color="#fff" />}
+        label="Edit"
         onPress={() => {
           swipeableRef.current?.close();
           onPress?.();
         }}
-      >
-        <Pencil size={20} color="#fff" />
-        <Text style={s.actionText}>Edit</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={s.deleteAction}
-        activeOpacity={0.85}
+      />
+      <SwipeAction
+        progress={progress}
+        color="#E24B4A"
+        icon={<Trash2 size={18} color="#fff" />}
+        label="Delete"
         onPress={() => {
           swipeableRef.current?.close();
           onDelete(id);
         }}
-      >
-        <Trash2 size={20} color="#fff" />
-        <Text style={s.actionText}>Delete</Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 

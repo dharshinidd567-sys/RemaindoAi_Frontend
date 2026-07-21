@@ -8,16 +8,17 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-
+import { LinearGradient } from 'expo-linear-gradient';
 import { Category, Summary, Task } from '../../../screens/home/task_page/task_screen_types';
 import { fetchTasks, toggleTask as toggleTaskApi, deleteTask as deleteTaskApi } from '../../../services/api';
 
 import ProgressCard from '../../../common/progresscard/progresscard';
 import FilterTabs from '../../../common/filter_tabs/filtertabs';
-import ListItem from '../../../common/list_item/list_item';
 import TaskPopup from './task_popup/task_popup';
-
+import ListItem, { formatDateNoYear } from '../../../common/list_item/list_item';
+import { Bell } from 'lucide-react-native';
 import { styles } from './task_screen_styles';
+import { COLORS } from '../../../common/footer/footer_styles';
 
 // dueTime is saved by the task popup as a single combined string, e.g.
 // "21 Jul 2026 05:30 PM". Split it back into a date part and a time part
@@ -52,7 +53,6 @@ export default function TaskScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const loadTasks = useCallback(async (category: Category) => {
     try {
       setError(null);
@@ -145,14 +145,20 @@ export default function TaskScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Tasks</Text>
         <TouchableOpacity
-          style={styles.addButton}
           activeOpacity={0.8}
           onPress={() => {
             setEditingTask(null);
             setModalVisible(true);
           }}
         >
-          <Text style={styles.addButtonText}>+</Text>
+          <LinearGradient
+             colors={[COLORS.accent1, COLORS.accent2]}
+            start={{ x: 0.3, y: 0.2 }}
+            end={{ x: 0.8, y: 0.9 }}
+            style={styles.addButton}
+          >
+            <Text style={styles.addButtonText}>+</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
 
@@ -179,54 +185,77 @@ export default function TaskScreen() {
           keyExtractor={(item) => item.taskId}
           renderItem={({ item }) => {
             const isOverdue = !item.isDone && item.isOverdue;
-            const datePart = item.dueDate || null;
+            const datePart = formatDateNoYear(item.dueDate);
             const timePart = item.dueTime || null;
 
             return (
-              <ListItem
-                id={item.taskId}
-                title={item.title}
-                subtitle={`${item.category} · ${item.priority}`}
-                done={item.isDone}
-                leftAccessory="checkbox"
-                accentColor={item.color}
-                emoji={item.tag}
-                onToggle={handleToggle}
-                onPress={() => handleEdit(item)}
-                onDelete={handleDelete}
-                rightNode={
-                  <View style={{ alignItems: 'flex-end' }}>
-                    {isOverdue && (
-                      <Text style={{ color: '#e8534c', fontSize: 12, fontWeight: '700' }}>
-                        ⚠ Late
-                      </Text>
-                    )}
-                    {datePart && (
-                      <Text
-                        style={{
-                          color: isOverdue ? '#e8534c' : '#8b899e',
-                          fontSize: 11,
-                          marginTop: 2,
-                        }}
-                      >
-                        {datePart}
-                      </Text>
-                    )}
-                    {timePart && (
-                      <Text
-                        style={{
-                          color: isOverdue ? '#e8534c' : '#e8e6f0',
-                          fontSize: 12,
-                          fontWeight: '600',
-                          marginTop: 2,
-                        }}
-                      >
-                        {timePart}
-                      </Text>
-                    )}
+              <View style={styles.cardContainer}>
+                {item.reminder && item.reminder !== 'None' && (
+                  <View style={styles.bellBadge}>
+                    <Bell
+                      size={16}
+                      color={isOverdue ? '#e8534c' : '#8b899e'}
+                      strokeWidth={2}
+                    />
                   </View>
-                }
-              />
+                )}
+
+                <ListItem
+                  id={item.taskId}
+                  title={item.title}
+                  subtitle={item.category}
+                  priority={item.priority}
+                  hasReminder={!!item.reminder}
+                  repeatType={item.repeat}
+                  done={item.isDone}
+                  leftAccessory="checkbox"
+                  onToggle={handleToggle}
+                  onPress={() => handleEdit(item)}
+                  onDelete={handleDelete}
+                  rightNode={
+                    <View style={{ alignItems: 'flex-end', minWidth: 72 }}>
+                      {isOverdue && (
+                        <Text
+                          style={{
+                            color: '#e8534c',
+                            fontSize: 12,
+                            fontWeight: '700',
+                          }}
+                        >
+                          ⚠ Late
+                        </Text>
+                      )}
+
+                      {datePart && (
+                        <Text
+                          style={{
+                            color: isOverdue ? '#e8534c' : '#8b899e',
+                            fontSize: 11,
+                            marginTop: 2,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {datePart}
+                        </Text>
+                      )}
+
+                      {timePart && (
+                        <Text
+                          style={{
+                            color: isOverdue ? '#e8534c' : '#e8e6f0',
+                            fontSize: 12,
+                            fontWeight: '600',
+                            marginTop: 2,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {timePart}
+                        </Text>
+                      )}
+                    </View>
+                  }
+                />
+              </View>
             );
           }}
           contentContainerStyle={styles.listContent}

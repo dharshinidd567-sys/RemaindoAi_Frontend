@@ -131,12 +131,12 @@ export default function TaskFormModal({
         priority: selectedPriority,
         dueDate: dueDate ? formatDate(dueDate) : '',
         dueTime: dueTime ? formatTime(dueTime) : '',
-        reminder: selectedReminder,
+        reminder: selectedReminder ?? '',
         repeat: selectedRepeat,
         color: selectedColor,
         tag: selectedEmoji,
         notes,
-      };
+      };  
 
       if (editingTask) {
         await updateTask(editingTask.taskId, taskData);
@@ -209,21 +209,6 @@ export default function TaskFormModal({
           placeholderTextColor="#8b899e"
           value={title}
           onChangeText={setTitle}
-          editable={!loading}
-        />
-      </View>
-
-      {/* Description */}
-      <View style={styles.section}>
-        <Text style={styles.label}>Description</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Enter task description"
-          placeholderTextColor="#8b899e"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          numberOfLines={3}
           editable={!loading}
         />
       </View>
@@ -364,64 +349,6 @@ export default function TaskFormModal({
             <Text style={styles.checkboxLabel}>{rep}</Text>
           </TouchableOpacity>
         ))}
-      </View>
-
-      {/* Color Selection */}
-      <View style={styles.section}>
-        <Text style={styles.label}>Assign Color</Text>
-        <View style={styles.colorRow}>
-          {COLORS.map((color) => (
-            <TouchableOpacity
-              key={color}
-              style={[
-                styles.colorOption,
-                { backgroundColor: color },
-                selectedColor === color && styles.colorOptionActive,
-              ]}
-              onPress={() => setSelectedColor(color)}
-              disabled={loading}
-            >
-              {selectedColor === color && (
-                <Text style={styles.colorCheckmark}>✓</Text>
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      {/* Emoji Selection */}
-      <View style={styles.section}>
-        <Text style={styles.label}>Emoji / Icon</Text>
-        <View style={styles.emojiRow}>
-          {EMOJIS.map((emoji) => (
-            <TouchableOpacity
-              key={emoji}
-              style={[
-                styles.emojiOption,
-                selectedEmoji === emoji && styles.emojiOptionActive,
-              ]}
-              onPress={() => setSelectedEmoji(emoji)}
-              disabled={loading}
-            >
-              <Text style={styles.emojiText}>{emoji}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      {/* Notes */}
-      <View style={styles.section}>
-        <Text style={styles.label}>Notes</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Add any notes"
-          placeholderTextColor="#8b899e"
-          value={notes}
-          onChangeText={setNotes}
-          multiline
-          numberOfLines={3}
-          editable={!loading}
-        />
       </View>
     </Popup>
   );

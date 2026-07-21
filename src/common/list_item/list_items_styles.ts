@@ -28,7 +28,8 @@ export const listRowStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.cardBorder,
     paddingHorizontal: 18,
-    marginBottom: 14,
+    marginBottom: 0,
+    marginTop: 10,
   },
 
   cardDone: {

@@ -8,6 +8,13 @@ export const styles = StyleSheet.create({
     paddingTop: 45,
     paddingBottom: 0,
   },
+  fab: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -55,5 +62,22 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     marginTop: 40,
+  },
+  cardContainer: {
+    position: "relative",
+    marginBottom: 14,
+  },
+
+  bellBadge: {
+    position: "absolute",
+    top: 6,
+    right: 1.5,
+    zIndex: 999,
+    width: 23,
+    height: 24,
+    borderRadius: 10,
+    backgroundColor: "#24213A",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
