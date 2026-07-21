@@ -10,12 +10,13 @@ export interface Task {
   priority?: 'Low' | 'Medium' | 'High';
   tag?: string;
   dueTime?: string;
+  dueDate?: string;
   isOverdue: boolean;
   isDone: boolean;
   order: number;
   reminder?: string;
   repeat?: string;
-  color?: string;
+  color?: any;
   emoji?: string;
   notes?: string;
 }

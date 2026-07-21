@@ -24,8 +24,13 @@ export type ListRowProps = {
   // Icon/emoji to render when leftAccessory === 'icon' (e.g. "🥛").
   icon?: string;
 
+  // Task-level emoji/tag (e.g. item.tag). Independent of leftAccessory —
+  // shows as its own small badge next to the checkbox, doesn't replace it.
+  emoji?: string;
+
   // Color for the checkbox fill/ring or the dot. Defaults to teal.
   // This is the "customise if you want, otherwise default" color knob.
+  // Also used for the card's left border strip when provided.
   accentColor?: string;
 
   // Whether the title gets struck through when done. Default true.
@@ -57,6 +62,7 @@ export default function ListItem({
   done = false,
   leftAccessory = 'checkbox',
   icon,
+  emoji,
   accentColor = COLORS.defaultAccent,
   strikeWhenDone = true,
   onToggle,
@@ -126,9 +132,44 @@ export default function ListItem({
     );
   };
 
+  // Small rounded badge for the task's emoji/tag. Sits between the
+  // checkbox/dot/icon slot and the text column. Doesn't render at all
+  // if no emoji was passed, so rows without a tag look unchanged.
+  const renderEmojiBadge = () => {
+    if (!emoji) return null;
+
+    return (
+      <View
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: 10,
+          backgroundColor: 'rgba(255,255,255,0.06)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginRight: 8,
+        }}
+      >
+        <Text style={{ fontSize: 16 }}>{emoji}</Text>
+      </View>
+    );
+  };
+
   const renderCard = () => (
-    <View style={[s.card, done && s.cardDone]}>
+    <View
+      style={[
+        s.card,
+        done && s.cardDone,
+        // Left border colour strip driven by accentColor (e.g. item.color).
+        // borderRadius reset to 0 so a single-side border doesn't look clipped.
+        !!accentColor && {
+          borderLeftWidth: 4,
+          borderLeftColor: accentColor,
+        },
+      ]}
+    >
       {renderLeft()}
+      {renderEmojiBadge()}
 
       <TouchableOpacity
         style={s.textCol}

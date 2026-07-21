@@ -62,6 +62,13 @@ export async function updateTask(id: string, payload: Partial<Task>): Promise<Ta
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/delete_task/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Failed to delete task');
+  const res = await fetch(`${BASE_URL}/delete_task/${id}`, {
+    method: "PUT",
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    console.log("Delete Error:", error);
+    throw new Error("Failed to delete task");
+  }
 }

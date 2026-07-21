@@ -22,15 +22,12 @@ export const listRowStyles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
-
+    paddingVertical: 10,
     backgroundColor: COLORS.cardBg,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: COLORS.cardBorder,
-
     paddingHorizontal: 18,
-    paddingVertical: 18,
-
     marginBottom: 14,
   },
 

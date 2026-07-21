@@ -19,6 +19,23 @@ import TaskPopup from './task_popup/task_popup';
 
 import { styles } from './task_screen_styles';
 
+// dueTime is saved by the task popup as a single combined string, e.g.
+// "21 Jul 2026 05:30 PM". Split it back into a date part and a time part
+// so the list row can show both instead of just one blob of text.
+function splitDueDateTime(dueTime?: string | null): { datePart: string | null; timePart: string | null } {
+  if (!dueTime) return { datePart: null, timePart: null };
+
+  const timeMatch = dueTime.match(/(\d{1,2}:\d{2}\s?(?:AM|PM))$/i);
+  if (!timeMatch) {
+    // Only a date (or an unrecognised format) was stored.
+    return { datePart: dueTime.trim(), timePart: null };
+  }
+
+  const timePart = timeMatch[1];
+  const datePart = dueTime.slice(0, timeMatch.index).trim();
+  return { datePart: datePart || null, timePart };
+}
+
 export default function TaskScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [summary, setSummary] = useState<Summary>({
@@ -162,9 +179,8 @@ export default function TaskScreen() {
           keyExtractor={(item) => item.taskId}
           renderItem={({ item }) => {
             const isOverdue = !item.isDone && item.isOverdue;
-            // Task time — adjust this field name to whatever your Task type
-            // actually calls it (e.g. dueTime, scheduledAt, time).
-            const timeLabel = (item as any).time ?? (item as any).dueTime ?? null;
+            const datePart = item.dueDate || null;
+            const timePart = item.dueTime || null;
 
             return (
               <ListItem
@@ -172,23 +188,44 @@ export default function TaskScreen() {
                 title={item.title}
                 subtitle={`${item.category} · ${item.priority}`}
                 done={item.isDone}
+                leftAccessory="checkbox"
+                accentColor={item.color}
+                emoji={item.tag}
                 onToggle={handleToggle}
                 onPress={() => handleEdit(item)}
                 onDelete={handleDelete}
                 rightNode={
-                  isOverdue ? (
-                    <Text
-                      style={{
-                        color: "#e8534c",
-                        fontSize: 12,
-                        fontWeight: "700",
-                      }}
-                    >
-                      ⚠ Late
-                    </Text>
-                  ) : undefined
+                  <View style={{ alignItems: 'flex-end' }}>
+                    {isOverdue && (
+                      <Text style={{ color: '#e8534c', fontSize: 12, fontWeight: '700' }}>
+                        ⚠ Late
+                      </Text>
+                    )}
+                    {datePart && (
+                      <Text
+                        style={{
+                          color: isOverdue ? '#e8534c' : '#8b899e',
+                          fontSize: 11,
+                          marginTop: 2,
+                        }}
+                      >
+                        {datePart}
+                      </Text>
+                    )}
+                    {timePart && (
+                      <Text
+                        style={{
+                          color: isOverdue ? '#e8534c' : '#e8e6f0',
+                          fontSize: 12,
+                          fontWeight: '600',
+                          marginTop: 2,
+                        }}
+                      >
+                        {timePart}
+                      </Text>
+                    )}
+                  </View>
                 }
-                rightText={!isOverdue ? timeLabel : undefined}
               />
             );
           }}
