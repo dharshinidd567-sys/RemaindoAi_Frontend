@@ -13,8 +13,7 @@ export interface TabConfig {
 export interface FooterProps {
   onTabPress?: (key: TabKey) => void;
   onFabPress?: () => void;
-  onTaskPress?: () => void;
-  initialActive?: TabKey;
+  active?: TabKey;
 }
 
 export interface NavItemProps {

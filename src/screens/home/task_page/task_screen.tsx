@@ -152,7 +152,7 @@ export default function TaskScreen() {
           }}
         >
           <LinearGradient
-             colors={[COLORS.accent1, COLORS.accent2]}
+            colors={[COLORS.accent1, COLORS.accent2]}
             start={{ x: 0.3, y: 0.2 }}
             end={{ x: 0.8, y: 0.9 }}
             style={styles.addButton}
@@ -190,22 +190,14 @@ export default function TaskScreen() {
 
             return (
               <View style={styles.cardContainer}>
-                {item.reminder && item.reminder !== 'None' && (
-                  <View style={styles.bellBadge}>
-                    <Bell
-                      size={16}
-                      color={isOverdue ? '#e8534c' : '#8b899e'}
-                      strokeWidth={2}
-                    />
-                  </View>
-                )}
+
 
                 <ListItem
                   id={item.taskId}
                   title={item.title}
                   subtitle={item.category}
                   priority={item.priority}
-                  hasReminder={!!item.reminder}
+                  hasReminder={!!item.reminder && item.reminder !== "None"}
                   repeatType={item.repeat}
                   done={item.isDone}
                   leftAccessory="checkbox"

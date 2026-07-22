@@ -79,27 +79,4 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  taskIconWrapper: {
-    position: 'absolute',
-    top: -60,
-    left: '50%',
-    marginLeft: -32,
-    zIndex: 100,
-  },
-  taskIconButton: {
-    width: 64,
-    alignItems: 'center',
-  },
-  taskIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: COLORS.accent2,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 6,
-  },
 });

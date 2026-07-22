@@ -8,10 +8,9 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { listRowStyles as s } from './list_items_styles';
-import { Pencil, Trash2 } from 'lucide-react-native';
-
+import { Bell, Pencil, Trash2 } from 'lucide-react-native';
 type LeftAccessory = 'checkbox' | 'dot' | 'icon' | 'none';
-
+  
 export type Priority = 'high' | 'medium' | 'low';
 export type RepeatType = 'daily' | 'weekly' | 'monthly' | 'custom';
 
@@ -201,41 +200,77 @@ export default function ListItem({
     );
   };
 
-  const renderCard = () => (
-    <View
-      style={[
-        s.card,
-        done && s.cardDone,
-        { borderLeftWidth: 4, borderLeftColor: accentColor },
-      ]}
-    >
-      {renderLeft()}
-      {renderEmojiBadge()}
-
-      <TouchableOpacity style={s.textCol} activeOpacity={0.7} onPress={onPress}>
-        <Text style={titleStyle} numberOfLines={1}>
-          {title}
-        </Text>
-        {!!subtitle && (
-          <Text style={s.subtitle} numberOfLines={1}>
-            {subtitle}
-          </Text>
-        )}
-      </TouchableOpacity>
-
-      <View style={s.rightSlot}>
-        {rightNode ? (
-          rightNode
-        ) : (
-          <Text
-            style={[s.rightText, rightTextStrikethrough && s.rightTextStrikethrough]}
-          >
-            {rightText}
-          </Text>
-        )}
+ const renderCard = () => (
+  <View
+    style={[
+      s.card,
+      done && s.cardDone,
+      {
+        borderLeftWidth: 4,
+        borderLeftColor: accentColor,
+        position: 'relative',
+      },
+    ]}
+  >
+    {/* Reminder Bell */}
+    {hasReminder && (
+      <View
+        style={{
+          position: 'absolute',
+          top: -8,
+          right: -1,
+          width: 28,
+          height: 28,
+          borderRadius: 14,
+          backgroundColor: '#2B2442',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 100,
+        }}
+      >
+        <Bell
+          size={14}
+           color= '#8b899e'
+          strokeWidth={2}
+        />
       </View>
+    )}
+
+    {renderLeft()}
+    {renderEmojiBadge()}
+
+    <TouchableOpacity
+      style={s.textCol}
+      activeOpacity={0.7}
+      onPress={onPress}
+    >
+      <Text style={titleStyle} numberOfLines={1}>
+        {title}
+      </Text>
+
+      {!!subtitle && (
+        <Text style={s.subtitle} numberOfLines={1}>
+          {subtitle}
+        </Text>
+      )}
+    </TouchableOpacity>
+
+    <View style={s.rightSlot}>
+      {rightNode ? (
+        rightNode
+      ) : (
+        <Text
+          style={[
+            s.rightText,
+            rightTextStrikethrough && s.rightTextStrikethrough,
+          ]}
+        >
+          {rightText}
+        </Text>
+      )}
     </View>
-  );
+  </View>
+);
 
   if (!swipeToDelete || !onDelete) {
     return renderCard();

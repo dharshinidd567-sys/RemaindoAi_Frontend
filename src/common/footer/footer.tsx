@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,13 +10,6 @@ const HomeIcon: React.FC<IconProps> = ({ color }) => (
   <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M3 11.5 12 4l9 7.5" />
     <Path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" />
-  </Svg>
-);
-
-const TaskIcon: React.FC<IconProps> = ({ color }) => (
-  <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M9 11l3 3L22 4" />
-    <Path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </Svg>
 );
 
@@ -82,11 +75,8 @@ const NavItem: React.FC<NavItemProps> = ({ label, Icon, isActive, onPress }) => 
   );
 };
 
-const Footer: React.FC<FooterProps> = ({ onTabPress, onFabPress, onTaskPress, initialActive = 'home' }) => {
-  const [active, setActive] = useState<TabKey>(initialActive);
-
+const Footer: React.FC<FooterProps> = ({ active = 'home', onTabPress, onFabPress }) => {
   const handlePress = (key: TabKey) => {
-    setActive(key);
     onTabPress?.(key);
   };
 
@@ -129,25 +119,6 @@ const Footer: React.FC<FooterProps> = ({ onTabPress, onFabPress, onTaskPress, in
           />
         ))}
       </View>
-
-      {active === 'home' && (
-        <View style={styles.taskIconWrapper}>
-          <TouchableOpacity 
-            style={styles.taskIconButton}
-            onPress={onTaskPress}
-            activeOpacity={0.7}
-          >
-            <LinearGradient
-              colors={['rgba(255,95,162,0.3)', 'rgba(124,92,255,0.3)']}
-              start={{ x: 0.3, y: 0.2 }}
-              end={{ x: 0.8, y: 0.9 }}
-              style={styles.taskIconCircle}
-            >
-              <TaskIcon color={COLORS.active} />
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 };

@@ -1,31 +1,32 @@
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import Footer from "./src/common/footer/footer";
-import TaskScreen from "./src/screens/home/task_page/task_screen";
+import {
+  APP_ROUTES,
+  AppRouteKey,
+  DEFAULT_ROUTE,
+  MainTabKey,
+  TAB_DEFAULT_ROUTES,
+} from "./src/routes/app_routes";
 
 export default function App() {
-  const [showTaskScreen, setShowTaskScreen] = useState(false);
+  const [routeKey, setRouteKey] = useState<AppRouteKey>(DEFAULT_ROUTE);
+  const activeRoute = APP_ROUTES[routeKey];
 
-  const handleTaskPress = () => {
-    setShowTaskScreen(true);
+  const handleTabPress = (key: MainTabKey) => {
+    setRouteKey(TAB_DEFAULT_ROUTES[key]);
   };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
         <View style={styles.content}>
-          {showTaskScreen ? (
-            <TaskScreen />
-          ) : (
-            <View style={styles.homeContent}>
-              <Text style={styles.homeText}>Home Screen</Text>
-            </View>
-          )}
+          {activeRoute.render(setRouteKey)}
         </View>
 
-        <Footer onTaskPress={handleTaskPress} />
+        <Footer active={activeRoute.tab} onTabPress={handleTabPress} />
       </View>
     </GestureHandlerRootView>
   );
@@ -38,15 +39,5 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  homeContent: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  homeText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#b9a6ff",
   },
 });
