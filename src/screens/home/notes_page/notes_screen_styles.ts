@@ -1,43 +1,49 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0b0a14',
+    backgroundColor: "#0B0A14",
     paddingHorizontal: 20,
     paddingTop: 45,
   },
-  header: {
+
+  filterWrap: {
+    marginTop: 12,
     marginBottom: 20,
   },
-  headerTitle: {
-    color: '#ffffff',
-    fontSize: 26,
-    fontWeight: '700',
+
+  listContent: {
+    paddingBottom: 100,
+    flexGrow: 1,
   },
-  emptyState: {
+
+  loadingContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 90,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#0B0A14",
   },
-  iconWrap: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#162720',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 30,
   },
+
   emptyTitle: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: '700',
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 16,
   },
-  emptyText: {
-    color: '#8b899e',
-    fontSize: 13,
-    marginTop: 6,
+
+  emptySubTitle: {
+    color: "#8E8E93",
+    fontSize: 15,
+    marginTop: 8,
+    textAlign: "center",
+    lineHeight: 22,
   },
 });

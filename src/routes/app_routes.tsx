@@ -1,9 +1,8 @@
 import React from 'react';
-
-import HomeDashboard from '../screens/home/dashboard/home_dashboard';
 import NotesScreen from '../screens/home/notes_page/notes_screen';
 import TaskScreen from '../screens/home/task_page/task_screen';
 import SimpleScreen from '../screens/shared/simple_screen';
+import Dashboard from '../screens/home/dashboard/dashboard';
 
 export type MainTabKey = 'home' | 'calendar' | 'analytics' | 'profile';
 
@@ -39,7 +38,7 @@ export const APP_ROUTES: Record<AppRouteKey, AppRoute> = {
     tab: 'home',
     title: 'Dashboard',
     render: (navigate) => (
-      <HomeDashboard
+      <Dashboard
         onTaskPress={() => navigate('home.tasks')}
         onNotesPress={() => navigate('home.notes')}
       />

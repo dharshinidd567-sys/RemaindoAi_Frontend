@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Animated,
 } from 'react-native';
-import { styles } from '../task_popup/task_popup_styles';
+import { styles } from '../../common/task_popup/task_popup_styles';
 
 export type AlertType = 'success' | 'error' | 'info';
 

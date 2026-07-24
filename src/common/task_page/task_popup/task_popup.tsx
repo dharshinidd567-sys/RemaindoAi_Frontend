@@ -8,10 +8,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { styles } from './task_popup_styles';
-import { createTask, updateTask } from '../../services/api';
-import { Task } from '../../screens/home/task_page/task_screen_types';
-import Popup from '../popup/popup';
-
+import { Task } from '../../../screens/home/task_page/task_screen_types';
+import { createTask } from '../../../services/home_services/task_api';
+import Popup from '../../popup/popup';
 const CATEGORIES = ['Work', 'Personal', 'Family', 'Health'];
 const PRIORITIES = ['Low', 'Medium', 'High'];
 const REMINDERS = ['None', '10 mins before', '30 mins before', '1 hour before', '1 day before'];

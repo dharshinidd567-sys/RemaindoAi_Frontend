@@ -2,16 +2,11 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CheckCircle2, NotebookText } from 'lucide-react-native';
-
 import { COLORS } from '../../../common/footer/footer_styles';
-import { styles } from './home_dashboard_styles';
+import { styles } from './dashboard_styles';
+import { DashboardProps } from './dashboard_types';
 
-interface HomeDashboardProps {
-  onTaskPress: () => void;
-  onNotesPress: () => void;
-}
-
-export default function HomeDashboard({ onTaskPress, onNotesPress }: HomeDashboardProps) {
+export default function Dashboard({ onTaskPress, onNotesPress }: DashboardProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>

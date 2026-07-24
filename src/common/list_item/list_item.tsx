@@ -1,5 +1,5 @@
 import React, { ReactNode, useRef } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ViewStyle } from 'react-native';
 import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Animated, {
   SharedValue,
@@ -10,7 +10,7 @@ import Animated, {
 import { listRowStyles as s } from './list_items_styles';
 import { Bell, Pencil, Trash2 } from 'lucide-react-native';
 type LeftAccessory = 'checkbox' | 'dot' | 'icon' | 'none';
-  
+
 export type Priority = 'high' | 'medium' | 'low';
 export type RepeatType = 'daily' | 'weekly' | 'monthly' | 'custom';
 
@@ -79,44 +79,65 @@ function SwipeAction({
   progress,
   color,
   icon,
-  label,
+  style,
   onPress,
 }: {
   progress: SharedValue<number>;
   color: string;
   icon: ReactNode;
-  label: string;
+  style?: ViewStyle;
   onPress: () => void;
 }) {
   const animatedStyle = useAnimatedStyle(() => {
-    const scale = interpolate(progress.value, [0, 1], [0.6, 1], Extrapolation.CLAMP);
-    const opacity = interpolate(progress.value, [0, 0.5, 1], [0, 0.6, 1], Extrapolation.CLAMP);
-    return { transform: [{ scale }], opacity };
+    const scale = interpolate(
+      progress.value,
+      [0, 1],
+      [0.8, 1],
+      Extrapolation.CLAMP
+    );
+
+    const opacity = interpolate(
+      progress.value,
+      [0, 0.5, 1],
+      [0, 0.6, 1],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      transform: [{ scale }],
+      opacity,
+    };
   });
 
   return (
-    <Animated.View style={[{ alignItems: 'center', marginHorizontal: 6 }, animatedStyle]}>
+    <Animated.View
+      style={[
+        {
+          justifyContent: "center",
+        },
+        animatedStyle,
+      ]}
+    >
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onPress}
-        style={{
-          width: 44,
-          height: 44,
-          borderRadius: 22,
-          backgroundColor: color,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        style={[
+          {
+            width: 56,
+            height: 70,
+            marginTop: 14,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: color,
+          },
+          style,
+        ]}
       >
         {icon}
       </TouchableOpacity>
-      <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
-        {label}
-      </Text>
     </Animated.View>
   );
 }
-
 export default function ListItem({
   id,
   title,
@@ -200,99 +221,115 @@ export default function ListItem({
     );
   };
 
- const renderCard = () => (
-  <View
-    style={[
-      s.card,
-      done && s.cardDone,
-      {
-        borderLeftWidth: 4,
-        borderLeftColor: accentColor,
-        position: 'relative',
-      },
-    ]}
-  >
-    {/* Reminder Bell */}
-    {hasReminder && (
-      <View
-        style={{
-          position: 'absolute',
-          top: -8,
-          right: -1,
-          width: 28,
-          height: 28,
-          borderRadius: 14,
-          backgroundColor: '#2B2442',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 100,
-        }}
-      >
-        <Bell
-          size={14}
-           color= '#8b899e'
-          strokeWidth={2}
-        />
-      </View>
-    )}
-
-    {renderLeft()}
-    {renderEmojiBadge()}
-
-    <TouchableOpacity
-      style={s.textCol}
-      activeOpacity={0.7}
-      onPress={onPress}
+  const renderCard = () => (
+    <View
+      style={[
+        s.card,
+        done && s.cardDone,
+        {
+          borderLeftWidth: 4,
+          borderLeftColor: accentColor,
+          position: 'relative',
+        },
+      ]}
     >
-      <Text style={titleStyle} numberOfLines={1}>
-        {title}
-      </Text>
-
-      {!!subtitle && (
-        <Text style={s.subtitle} numberOfLines={1}>
-          {subtitle}
-        </Text>
-      )}
-    </TouchableOpacity>
-
-    <View style={s.rightSlot}>
-      {rightNode ? (
-        rightNode
-      ) : (
-        <Text
-          style={[
-            s.rightText,
-            rightTextStrikethrough && s.rightTextStrikethrough,
-          ]}
+      {/* Reminder Bell */}
+      {hasReminder && (
+        <View
+          style={{
+            position: 'absolute',
+            top: -8,
+            right: -1,
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            backgroundColor: '#2B2442',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 100,
+          }}
         >
-          {rightText}
-        </Text>
+          <Bell
+            size={14}
+            color='#8b899e'
+            strokeWidth={2}
+          />
+        </View>
       )}
+
+      {renderLeft()}
+      {renderEmojiBadge()}
+
+      <TouchableOpacity
+        style={s.textCol}
+        activeOpacity={0.7}
+        onPress={onPress}
+      >
+        <Text style={titleStyle} numberOfLines={1}>
+          {title}
+        </Text>
+
+        {!!subtitle && (
+          <Text style={s.subtitle} numberOfLines={1}>
+            {subtitle}
+          </Text>
+        )}
+      </TouchableOpacity>
+
+      <View style={s.rightSlot}>
+        {rightNode ? (
+          rightNode
+        ) : (
+          <Text
+            style={[
+              s.rightText,
+              rightTextStrikethrough && s.rightTextStrikethrough,
+            ]}
+          >
+            {rightText}
+          </Text>
+        )}
+      </View>
     </View>
-  </View>
-);
+  );
 
   if (!swipeToDelete || !onDelete) {
     return renderCard();
   }
 
   const renderRightActions = (progress: SharedValue<number>) => (
-    <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8 }}>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        marginLeft: 4,
+
+      }}
+    >
       <SwipeAction
         progress={progress}
-        color="rgba(255,255,255,0.08)"
-        icon={<Pencil size={18} color="#fff" />}
-        label="Edit"
+        color="#2b283b"
+        icon={<Pencil size={20} color="#cbc4c4" />}
+        style={{
+          marginRight: -2,
+          borderTopLeftRadius: 13,
+          borderBottomLeftRadius: 13,
+        }}
         onPress={() => {
           swipeableRef.current?.close();
           onPress?.();
         }}
       />
+
       <SwipeAction
         progress={progress}
-        color="#E24B4A"
-        icon={<Trash2 size={18} color="#fff" />}
-        label="Delete"
+        color="#8a3737"
+        icon={<Trash2 size={20} color="#cbc4c4" />}
+        style={{
+
+          borderTopRightRadius: 13,
+          borderBottomRightRadius: 13,
+        }}
         onPress={() => {
           swipeableRef.current?.close();
           onDelete(id);

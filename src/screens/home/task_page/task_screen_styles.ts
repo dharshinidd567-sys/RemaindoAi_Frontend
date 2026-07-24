@@ -57,6 +57,26 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     marginBottom: 8,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+    paddingTop: 80,
+  },
+  emptyTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 16,
+  },
+  emptySubTitle: {
+    color: '#8E8E93',
+    fontSize: 15,
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
   emptyText: {
     color: '#6b697d',
     fontSize: 13,

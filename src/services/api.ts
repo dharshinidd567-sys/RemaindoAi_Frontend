@@ -1,74 +1,27 @@
-import { Category, Task, TasksResponse } from '../screens/home/task_page/task_screen_types';
 import { Platform } from "react-native";
-// Point this at your machine's LAN IP when testing on a physical device —
-// 'localhost' won't resolve to your dev machine from a real phone.
-// e.g. 'http://192.168.1.42:5000/api/v1'
-// const BASE_URL =process.env.EXPO_PUBLIC_API_URL;
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL_DEVICE!;
+export const BASE_URL = process.env.EXPO_PUBLIC_API_URL_DEVICE!;
+
 console.log("Platform:", Platform.OS);
 console.log("BASE_URL:", BASE_URL);
-export async function fetchTasks(category: Category): Promise<TasksResponse> {
-  const query = category !== "All" ? `?category=${category}` : "";
 
-  const res = await fetch(`${BASE_URL}/get_alltask${query}`);
-
-  if (!res.ok) throw new Error("Failed to load tasks");
-
-  return res.json();
-}// 
-
-export async function fetchTaskById(id: string): Promise<Task> {
-  const res = await fetch(`${BASE_URL}/get_task/${id}`);
-  if (!res.ok) throw new Error('Failed to load task');
-  return res.json();
-}
-
-export async function toggleTask(id: string): Promise<Task> {
-  const res = await fetch(`${BASE_URL}/toggle_task/${id}`, { method: 'PATCH' });
-  if (!res.ok) throw new Error('Failed to update task');
-  return res.json();
-}
-
-export async function createTask(payload: Partial<Task>): Promise<Task> {
-  console.log("Sending Payload:", payload);
-  const res = await fetch(`${BASE_URL}/create_task`, {
-    method: "POST",
+export async function apiRequest<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
+      ...(options?.headers || {}),
     },
-    body: JSON.stringify(payload),
+    ...options,
   });
 
-  const data = await res.text();
+  const text = await response.text();
 
-  console.log("Status:", res.status);
-  console.log("Response:", data);
-
-  if (!res.ok) {
-    throw new Error(data);
+  if (!response.ok) {
+    throw new Error(text);
   }
-  return JSON.parse(data);
-}
 
-export async function updateTask(id: string, payload: Partial<Task>): Promise<Task> {
-  const res = await fetch(`${BASE_URL}/update_task/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('Failed to update task');
-  return res.json();
-}
-
-export async function deleteTask(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/delete_task/${id}`, {
-    method: "PUT",
-  });
-
-  if (!res.ok) {
-    const error = await res.text();
-    console.log("Delete Error:", error);
-    throw new Error("Failed to delete task");
-  }
+  return JSON.parse(text) as T;
 }

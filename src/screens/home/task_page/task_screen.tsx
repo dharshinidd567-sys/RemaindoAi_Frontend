@@ -1,28 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
-  Alert,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import {View,Text,FlatList,ActivityIndicator,RefreshControl,Alert,} from 'react-native';
 import { Category, Summary, Task } from '../../../screens/home/task_page/task_screen_types';
-import { fetchTasks, toggleTask as toggleTaskApi, deleteTask as deleteTaskApi } from '../../../services/api';
-
 import ProgressCard from '../../../common/progresscard/progresscard';
 import FilterTabs from '../../../common/filter_tabs/filtertabs';
 import TaskPopup from './task_popup/task_popup';
 import ListItem, { formatDateNoYear } from '../../../common/list_item/list_item';
-import { Bell } from 'lucide-react-native';
 import { styles } from './task_screen_styles';
-import { COLORS } from '../../../common/footer/footer_styles';
+import Header from '../../../helper_common/header/header';
+import {fetchTasks,deleteTask,toggleTask,} from "../../../services/home_services/task_api";
 
-// dueTime is saved by the task popup as a single combined string, e.g.
-// "21 Jul 2026 05:30 PM". Split it back into a date part and a time part
-// so the list row can show both instead of just one blob of text.
 function splitDueDateTime(dueTime?: string | null): { datePart: string | null; timePart: string | null } {
   if (!dueTime) return { datePart: null, timePart: null };
 
@@ -54,27 +40,22 @@ export default function TaskScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const loadTasks = useCallback(async (category: Category) => {
-    try {
-      setError(null);
+  try {
+    setError(null);
 
-      const data = await fetchTasks(category);
+    const data = await fetchTasks(category);
 
-      console.log("API DATA:", data);
+    console.log("API DATA:", data);
 
-      const taskList = data.tasks ?? [];
-
-      console.log("TASK LIST:", taskList);
-
-      setTasks(taskList);
-    } catch (err) {
-      console.error("LOAD ERROR:", err);
-      setError("Could not load tasks.");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
+    setTasks(data.tasks ?? []);
+  } catch (err) {
+    console.error(err);
+    setError("Could not load tasks.");
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+}, []);
   // Client-side safety net: filters what's shown by the active tab even if
   // the API doesn't already filter by category server-side.
   const visibleTasks =
@@ -106,19 +87,24 @@ export default function TaskScreen() {
     loadTasks(activeCategory);
   };
 
-  const handleToggle = async (taskId: string) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.taskId === taskId ? { ...t, isDone: !t.isDone } : t))
-    );
-    try {
-      await toggleTaskApi(taskId);
-      loadTasks(activeCategory);
-    } catch (err) {
-      setError('Could not update task.');
-      loadTasks(activeCategory);
-    }
-  };
+const handleToggle = async (taskId: string) => {
+  setTasks((prev) =>
+    prev.map((t) =>
+      t.taskId === taskId
+        ? { ...t, isDone: !t.isDone }
+        : t
+    )
+  );
 
+  try {
+    await toggleTask(taskId);
+    loadTasks(activeCategory);
+  } catch (err) {
+    console.error(err);
+    setError("Could not update task.");
+    loadTasks(activeCategory);
+  }
+};
   const handleEdit = (task: Task) => {
     setEditingTask(task);
     setModalVisible(true);
@@ -131,7 +117,7 @@ export default function TaskScreen() {
     setTasks((prev) => prev.filter((t) => t.taskId !== taskId));
 
     try {
-      await deleteTaskApi(taskId);
+      await deleteTask(taskId);
     } catch (err) {
       console.error("DELETE ERROR:", err);
       setError('Could not delete task.');
@@ -142,25 +128,13 @@ export default function TaskScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Tasks</Text>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => {
-            setEditingTask(null);
-            setModalVisible(true);
-          }}
-        >
-          <LinearGradient
-            colors={[COLORS.accent1, COLORS.accent2]}
-            start={{ x: 0.3, y: 0.2 }}
-            end={{ x: 0.8, y: 0.9 }}
-            style={styles.addButton}
-          >
-            <Text style={styles.addButtonText}>+</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
+      <Header
+        title="My Tasks"
+        onPress={() => {
+          setEditingTask(null);
+          setModalVisible(true);
+        }}
+      />
 
       <View style={styles.progressWrap}>
         <ProgressCard summary={summary} />
@@ -259,7 +233,15 @@ export default function TaskScreen() {
             />
           }
           ListEmptyComponent={
-            <Text style={styles.emptyText}>No tasks in this category yet.</Text>
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>
+                No Tasks Yet
+              </Text>
+
+              <Text style={styles.emptySubTitle}>
+                Tap the + button to create your first task.
+              </Text>
+            </View>
           }
         />
       )}

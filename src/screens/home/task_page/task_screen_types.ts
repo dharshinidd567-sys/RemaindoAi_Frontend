@@ -30,7 +30,10 @@ export interface Summary {
   overdue: number;
   percent: number;
 }
-
+export interface TasksResponse {
+  success: boolean;
+  tasks: Task[];
+}
 export interface TasksResponse {
   tasks: Task[];
   summary: Summary;

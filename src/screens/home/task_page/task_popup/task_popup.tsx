@@ -7,11 +7,11 @@ import {
   Alert,
 } from 'react-native';
 import { Task } from '../task_screen_types';
-import { createTask, updateTask } from '../../../../services/api';
 import Popup from '../../../../common/popup/popup';
-import DatePicker, { formatDate } from '../../../../common/date_picker/datePicker';
-import TimePicker, { formatTime } from '../../../../common/time_picker/timePicker';
+import DatePicker, { formatDate } from '../../../../helper_common/date_picker/datePicker';
+import TimePicker, { formatTime } from '../../../../helper_common/header/time_picker/timePicker';
 import { styles } from './task_popup_styles';
+import { createTask, updateTask } from '../../../../services/home_services/task_api';
 
 interface TaskFormModalProps {
   visible: boolean;
